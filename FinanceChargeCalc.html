@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Head Content -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Charges Explained</title>
+    <!-- Load Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Load Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Styles */
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            /* Replace 'blue.svg' with the correct path to your background image */
+            background: url('blue.svg') no-repeat center center fixed;
+            background-size: cover;
+            margin: 0;
+            padding: 20px;
+            color: #343a40;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: rgba(255, 255, 255, 0.9); /* Added semi-transparency for readability */
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #343a40;
+            font-size: 32px;
+            margin-bottom: 40px;
+        }
+
+        .accordion-button {
+            width: 100%;
+            padding: 15px;
+            text-align: left;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            outline: none;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .accordion-button:hover,
+        .accordion-button:focus {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .accordion-content {
+            padding: 20px;
+            display: none;
+            background-color: #f1f3f5;
+            border-radius: 8px;
+            margin-top: -10px;
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .accordion-item {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-size: 16px;
+            color: #495057;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        input, select {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            border: 1px solid #ced4da;
+            outline: none;
+            transition: border 0.3s ease, box-shadow 0.3s ease;
+            background-color: #ffffff;
+        }
+
+        input:focus, select:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
+        }
+
+        button {
+            padding: 12px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 6px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover,
+        button:focus {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
+        #result, #payment-result, #fc-result, #large-payment-result, #amortization-result {
+            margin-top: 20px;
+            font-weight: bold;
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            color: #343a40;
+        }
+
+        /* Company-Specific Formatting */
+        #result, #payment-result, #fc-result {
+            background-color: #ff6b6b;
+            color: white;
+        }
+
+        #large-payment-result {
+            background-color: #ffa502;
+            color: white;
+        }
+
+        #error-message, #error-message-payment, #error-message-large-payment, #error-message-amortization {
+            color: #e03131;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .disabled {
+            background-color: #adb5bd;
+            cursor: not-allowed;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .accordion-button {
+                font-size: 18px;
+            }
+
+            label, input, button {
+                font-size: 14px;
+            }
+        }
+
+        /* Amortization Chart */
+        #amortization-chart-container {
+            max-width: 800px;
+            margin: auto;
+            overflow-x: auto;
+        }
+
+        /* Adjustments Table */
+        #adjustments-table {
+            width: 100%;
+            margin-bottom: 20px;
+            border-collapse: collapse;
+        }
+
+        #adjustments-table th, #adjustments-table td {
+            border: 1px solid #dee2e6;
+            padding: 8px;
+            text-align: center;
+        }
+
+        #adjustments-table th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .remove-adjustment {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .remove-adjustment:hover {
+            background-color: #c82333;
+        }
+
+        /* Summary Section */
+        #summary {
+            margin-top: 20px;
+            background-color: #6c757d;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        /* Collapsible Adjustments Section */
+        .collapsible {
+            background-color: #17a2b8;
+            color: white;
+            cursor: pointer;
+            padding: 12px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 18px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .collapsible:hover,
+        .collapsible:focus {
+            background-color: #138496;
+            transform: translateY(-2px);
+        }
+
+        .collapsible-content {
+            display: none;
+            padding: 0 18px;
+            overflow: hidden;
+            background-color: #f1f3f5;
+            border-radius: 6px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* Fade-in Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Chart Legend */
+        .chartjs-legend ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .chartjs-legend li {
+            margin: 0 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .chartjs-legend span {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            margin-right: 5px;
+            border-radius: 2px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Understanding Your Finance Charges</h1>
+        <div class="accordion">
+            <!-- Finance Charge Calculator -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" onclick="toggleAccordion('contentOne')">
+                        How are finance charges calculated?
+                    </button>
+                </h2>
+                <div class="accordion-content" id="contentOne">
+                    <p>Your Retail Installment Contract is a "simple interest" contract. This means that finance charges accrue daily based on the outstanding principal balance and the APR.</p>
+                    <p><strong>Formula:</strong> Daily Finance Charge = Principal Balance x APR / 365</p>
+                    <div id="calculator">
+                        <h3>Finance Charge Calculator</h3>
+                        <label for="principal">Principal Balance ($): </label>
+                        <input type="number" id="principal" placeholder="10000" min="0.01" step="0.01">
+                        <label for="apr">APR (%): </label>
+                        <input type="number" id="apr" placeholder="10" min="0.01" step="0.01">
+                        <button id="calculate-dfc-btn" onclick="calculateFinanceCharge()">Calculate Daily Finance Charge</button>
+                        <p id="result"></p>
+                        <button id="use-dfc-btn" onclick="useDFC()" disabled>Use this DFC in the Payment Calculator</button>
+                        <p id="error-message"></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Payment Breakdown Calculator -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" onclick="toggleAccordion('contentTwo')">
+                        Calculate Amount Applied to Principal Balance
+                    </button>
+                </h2>
+                <div class="accordion-content" id="contentTwo">
+                    <div id="payment-calculator">
+                        <h3>Payment Breakdown Calculator</h3>
+                        <label for="payment">Payment Amount ($): </label>
+                        <input type="number" id="payment" placeholder="500" min="0.01" step="0.01">
+                        <label for="days">Days Since Last Payment: </label>
+                        <input type="number" id="days" placeholder="30" min="0" step="1">
+                        <label for="dfc">Daily Finance Charge ($): </label>
+                        <input type="number" id="dfc" placeholder="2.74" min="0.0001" step="0.0001">
+                        <button onclick="calculatePaymentBreakdown()">Calculate Amount Applied to PB</button>
+                        <p id="payment-result"></p>
+                        <p id="fc-result"></p>
+                        <p id="error-message-payment"></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Large Payment Breakdown Calculator -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" onclick="toggleAccordion('contentThree')">
+                        Large Payment Calculation
+                    </button>
+                </h2>
+                <div class="accordion-content" id="contentThree">
+                    <div id="large-payment-calculator">
+                        <h3>Large Payment Breakdown</h3>
+                        <label for="principalLarge">Principal Balance ($): </label>
+                        <input type="number" id="principalLarge" placeholder="25000" min="0.01" step="0.01">
+                        <label for="monthlyPayment">Monthly Payment Amount ($): </label>
+                        <input type="number" id="monthlyPayment" placeholder="500" min="0.01" step="0.01">
+                        <label for="totalPayment">Total Payment Amount ($): </label>
+                        <input type="number" id="totalPayment" placeholder="1500" min="0.01" step="0.01">
+                        <label for="aprLarge">APR (%): </label>
+                        <input type="number" id="aprLarge" placeholder="10" min="0.01" step="0.01">
+                        <label for="daysInMonthLarge">Days Since Last Payment: </label>
+                        <input type="number" id="daysInMonthLarge" placeholder="30" min="0" step="1">
+                        <button onclick="calculateLargePayment()">Calculate Large Payment Breakdown</button>
+                        <p id="large-payment-result"></p>
+                        <p id="error-message-large-payment"></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Amortization Schedule -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" onclick="toggleAccordion('contentFour')">
+                        Amortization Schedule
+                    </button>
+                </h2>
+                <div class="accordion-content" id="contentFour">
+                    <div id="amortization-calculator">
+                        <h3>Amortization Schedule Calculator</h3>
+                        <label for="principalAmort">Principal Balance ($): </label>
+                        <input type="number" id="principalAmort" placeholder="25000" min="0.01" step="0.01">
+                        <label for="aprAmort">APR (%): </label>
+                        <input type="number" id="aprAmort" placeholder="10" min="0.01" step="0.01">
+                        <label for="termAmort">Loan Term (Months): </label>
+                        <input type="number" id="termAmort" placeholder="60" min="1" step="1">
+                        <label for="loanStartDate">Loan Start Date: </label>
+                        <input type="date" id="loanStartDate">
+
+                        <!-- Added First Payment Timing Option -->
+                        <label for="firstPaymentTiming">First Payment Due In: </label>
+                        <select id="firstPaymentTiming">
+                            <option value="30">30 Days</option>
+                            <option value="45">45 Days</option>
+                        </select>
+
+                        <!-- Display Monthly Due Date -->
+                        <p id="monthlyDueDateDisplay" style="font-weight:bold;"></p>
+
+                        <!-- Adjustments Section -->
+                        <button class="collapsible" type="button" onclick="toggleCollapsible('adjustmentsContent')">
+                            Add Adjustments
+                        </button>
+                        <div id="adjustmentsContent" class="collapsible-content">
+                            <h4>Add Adjustments</h4>
+                            <label for="adjustmentType">Adjustment Type: </label>
+                            <select id="adjustmentType">
+                                <option value="overpayment">Overpayment</option>
+                                <option value="latePayment">Late Payment</option>
+                                <option value="deferment">Deferment</option>
+                            </select>
+                            <label for="adjustmentAmount">Amount ($): </label>
+                            <input type="number" id="adjustmentAmount" placeholder="0" min="0" step="0.01">
+                            <label for="adjustmentMonth">Month of Adjustment: </label>
+                            <input type="number" id="adjustmentMonth" placeholder="1" min="1" step="1">
+                            <label for="daysLate" id="daysLateLabel" style="display: none;">Days Late: </label>
+                            <input type="number" id="daysLate" placeholder="5" min="1" step="1" style="display: none;">
+                            <label for="defermentMonths" id="defermentMonthsLabel" style="display: none;">Number of Months to Defer: </label>
+                            <input type="number" id="defermentMonths" placeholder="1" min="1" step="1" style="display: none;">
+                            <button onclick="addAdjustment()">Add Adjustment</button>
+                            <!-- Adjustments Table -->
+                            <table id="adjustments-table">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Month</th>
+                                        <th>Amount ($)</th>
+                                        <th>Days Late</th>
+                                        <th>Deferment Months</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adjustments-body">
+                                    <!-- Adjustments will be listed here -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <button onclick="generateAmortizationSchedule()">Generate Amortization Schedule</button>
+                        <p id="error-message-amortization"></p>
+                        <div id="amortization-chart-container">
+                            <canvas id="amortizationChart"></canvas>
+                        </div>
+                        <div id="summary">
+                            <!-- Summary will be displayed here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Other accordions can be added here -->
+        </div>
+    </div>
+
+    <!-- JavaScript Code -->
+    <script>
+        (function() {
+            let storedDFC = 0;
+            let amortizationChart;
+            let adjustments = [];
+
+            function toggleAccordion(contentId) {
+                const content = document.getElementById(contentId);
+                content.style.display = content.style.display === "block" ? "none" : "block";
+            }
+
+            function toggleCollapsible(contentId) {
+                const content = document.getElementById(contentId);
+                content.style.display = content.style.display === "block" ? "none" : "block";
+            }
+
+            function formatCurrency(value) {
+                return '$' + parseFloat(value).toFixed(2);
+            }
+
+            function calculateFinanceCharge() {
+                const principalInput = document.getElementById("principal");
+                const aprInput = document.getElementById("apr");
+                const principal = parseFloat(principalInput.value);
+                const apr = parseFloat(aprInput.value);
+
+                const errorMessage = document.getElementById("error-message");
+                errorMessage.textContent = "";
+
+                if (isNaN(principal) || isNaN(apr) || principal <= 0 || apr <= 0) {
+                    errorMessage.textContent = "Please enter valid positive numbers for both principal and APR.";
+                    document.getElementById("result").textContent = "";
+                    return;
+                }
+
+                // Considering leap years
+                const dailyFinanceCharge = (principal * (apr / 100)) / 365.25;
+                storedDFC = dailyFinanceCharge;
+                document.getElementById("result").textContent = `Daily Finance Charge: ${formatCurrency(dailyFinanceCharge)}`;
+                document.getElementById("use-dfc-btn").disabled = false;
+            }
+
+            function useDFC() {
+                if (storedDFC > 0) {
+                    const dfcValue = storedDFC.toFixed(4);
+                    document.getElementById("dfc").value = dfcValue;
+                } else {
+                    alert("Please calculate the Daily Finance Charge first.");
+                }
+            }
+
+            function calculatePaymentBreakdown() {
+                const payment = parseFloat(document.getElementById("payment").value);
+                const days = parseInt(document.getElementById("days").value);
+                const dfc = parseFloat(document.getElementById("dfc").value);
+
+                const errorMessage = document.getElementById("error-message-payment");
+                errorMessage.textContent = "";
+                document.getElementById("payment-result").textContent = "";
+                document.getElementById("fc-result").textContent = "";
+
+                if (isNaN(payment) || isNaN(days) || isNaN(dfc) || payment <= 0 || days < 0 || dfc <= 0) {
+                    errorMessage.textContent = "Please enter valid positive numbers for payment, days, and daily finance charge.";
+                    return;
+                }
+
+                const financeCharges = days * dfc;
+                let amountAppliedToPB = payment - financeCharges;
+
+                if (amountAppliedToPB < 0) {
+                    amountAppliedToPB = 0;
+                    document.getElementById("payment-result").textContent = "Your payment does not cover the accrued finance charges.";
+                } else {
+                    document.getElementById("payment-result").textContent = `Amount Applied to Principal Balance: ${formatCurrency(amountAppliedToPB)}`;
+                }
+
+                const financeChargesPaid = payment - amountAppliedToPB;
+                document.getElementById("fc-result").textContent = `Amount Paid to Finance Charges: ${formatCurrency(financeChargesPaid)}`;
+            }
+
+            function calculateLargePayment() {
+                const principal = parseFloat(document.getElementById("principalLarge").value);
+                const monthlyPayment = parseFloat(document.getElementById("monthlyPayment").value);
+                const payment = parseFloat(document.getElementById("totalPayment").value);
+                const apr = parseFloat(document.getElementById("aprLarge").value);
+                const daysSinceLastPayment = parseInt(document.getElementById("daysInMonthLarge").value);
+
+                const errorMessage = document.getElementById("error-message-large-payment");
+                errorMessage.textContent = "";
+                document.getElementById("large-payment-result").textContent = "";
+
+                if (isNaN(principal) || isNaN(monthlyPayment) || isNaN(payment) || isNaN(apr) || isNaN(daysSinceLastPayment) ||
+                    principal <= 0 || monthlyPayment <= 0 || payment <= 0 || apr <= 0 || daysSinceLastPayment < 0) {
+                    errorMessage.textContent = "Please enter valid positive numbers for all fields.";
+                    return;
+                }
+
+                // Calculate interest due since last payment
+                const interestDue = principal * (apr / 100) * (daysSinceLastPayment / 365.25);
+
+                let remainingPayment = payment;
+                let interestPaid = 0;
+                let principalApplied = 0;
+
+                // Pay off current finance charges
+                if (remainingPayment >= interestDue) {
+                    interestPaid = interestDue;
+                    remainingPayment -= interestPaid;
+                } else {
+                    interestPaid = remainingPayment;
+                    remainingPayment = 0;
+                }
+
+                // Apply remaining payment to current principal
+                if (remainingPayment >= (monthlyPayment - interestPaid)) {
+                    principalApplied += (monthlyPayment - interestPaid);
+                    remainingPayment -= (monthlyPayment - interestPaid);
+                } else {
+                    principalApplied += remainingPayment;
+                    remainingPayment = 0;
+                }
+
+                // Calculate number of future payments covered
+                let futurePaymentsCovered = Math.floor(remainingPayment / monthlyPayment);
+                principalApplied += futurePaymentsCovered * (monthlyPayment);
+                remainingPayment -= futurePaymentsCovered * monthlyPayment;
+
+                // Apply any remaining amount directly to principal
+                principalApplied += remainingPayment;
+
+                // New principal balance
+                const newPrincipal = principal - principalApplied;
+
+                // New DFC
+                const newDFC = (newPrincipal * (apr / 100)) / 365.25;
+
+                // Calculate DFC owed at the end of paid-ahead period
+                const totalDaysPaidAhead = futurePaymentsCovered * 30; // Assuming 30 days per month
+                const futureDFCAccrued = totalDaysPaidAhead * newDFC;
+
+                document.getElementById("large-payment-result").innerHTML = `
+                    <strong>Finance Charges Paid for This Month:</strong><br>
+                    ${formatCurrency(interestPaid)}<br><br>
+                    <strong>Amount Applied to Current Month's Principal Balance:</strong><br>
+                    ${formatCurrency(principalApplied - (futurePaymentsCovered * monthlyPayment))}<br><br>
+                    <strong>Amount Applied to Future Principal Balance:</strong><br>
+                    ${formatCurrency(futurePaymentsCovered * monthlyPayment)}<br><br>
+                    <strong>Total Applied to Principal Balance:</strong><br>
+                    ${formatCurrency(principalApplied)}<br><br>
+                    <strong>New Principal Balance:</strong><br>
+                    ${formatCurrency(newPrincipal)}<br><br>
+                    <strong>Future Payments Covered:</strong><br>
+                    ${futurePaymentsCovered} months<br><br>
+                    <strong>Reduced Daily Finance Charge for Future Payments:</strong><br>
+                    ${formatCurrency(newDFC.toFixed(4))} per day<br><br>
+                    <strong>Amount of DFC Owed at the End of Paid-Ahead Period:</strong><br>
+                    ${formatCurrency(futureDFCAccrued)}
+                `;
+            }
+
+            // Update adjustment inputs based on type
+            const adjustmentTypeSelect = document.getElementById('adjustmentType');
+            adjustmentTypeSelect.addEventListener('change', function() {
+                const daysLateLabel = document.getElementById('daysLateLabel');
+                const daysLateInput = document.getElementById('daysLate');
+                const adjustmentAmountInput = document.getElementById('adjustmentAmount');
+                const defermentMonthsLabel = document.getElementById('defermentMonthsLabel');
+                const defermentMonthsInput = document.getElementById('defermentMonths');
+
+                if (this.value === 'latePayment') {
+                    daysLateLabel.style.display = 'block';
+                    daysLateInput.style.display = 'block';
+                    adjustmentAmountInput.disabled = true;
+                    adjustmentAmountInput.value = '';
+                    defermentMonthsLabel.style.display = 'none';
+                    defermentMonthsInput.style.display = 'none';
+                    defermentMonthsInput.value = '';
+                } else if (this.value === 'overpayment') {
+                    daysLateLabel.style.display = 'none';
+                    daysLateInput.style.display = 'none';
+                    daysLateInput.value = '';
+                    adjustmentAmountInput.disabled = false;
+                    defermentMonthsLabel.style.display = 'none';
+                    defermentMonthsInput.style.display = 'none';
+                    defermentMonthsInput.value = '';
+                } else if (this.value === 'deferment') {
+                    daysLateLabel.style.display = 'none';
+                    daysLateInput.style.display = 'none';
+                    daysLateInput.value = '';
+                    adjustmentAmountInput.disabled = true;
+                    adjustmentAmountInput.value = '';
+                    defermentMonthsLabel.style.display = 'block';
+                    defermentMonthsInput.style.display = 'block';
+                }
+            });
+
+            function addAdjustment() {
+                const type = document.getElementById('adjustmentType').value;
+                let amount = parseFloat(document.getElementById('adjustmentAmount').value);
+                const adjMonth = parseInt(document.getElementById('adjustmentMonth').value);
+                const termMonths = parseInt(document.getElementById("termAmort").value);
+                let daysLate = parseInt(document.getElementById('daysLate').value);
+                let defermentMonths = parseInt(document.getElementById('defermentMonths').value);
+
+                const errorMessage = document.getElementById("error-message-amortization");
+                errorMessage.textContent = "";
+
+                if (type === 'overpayment') {
+                    if (isNaN(amount) || amount <= 0) {
+                        errorMessage.textContent = "Please enter a valid overpayment amount.";
+                        return;
+                    }
+                } else if (type === 'latePayment') {
+                    amount = 0; // Amount is not needed for late payments
+                    if (isNaN(daysLate) || daysLate <= 0) {
+                        errorMessage.textContent = "Please enter a valid number of days late.";
+                        return;
+                    }
+                } else if (type === 'deferment') {
+                    amount = 0; // Amount is not needed for deferments
+                    daysLate = 0;
+                    if (isNaN(defermentMonths) || defermentMonths <= 0) {
+                        errorMessage.textContent = "Please enter a valid number of deferment months.";
+                        return;
+                    }
+                }
+
+                if (isNaN(adjMonth) || adjMonth < 1 || isNaN(termMonths) || adjMonth > termMonths) {
+                    errorMessage.textContent = "Please enter a valid adjustment month within the loan term.";
+                    return;
+                }
+
+                // Add adjustment to the list
+                adjustments.push({
+                    type: type,
+                    month: adjMonth,
+                    amount: amount || 0,
+                    daysLate: daysLate || 0,
+                    defermentMonths: defermentMonths || 0
+                });
+
+                // Sort adjustments by month
+                adjustments.sort((a, b) => a.month - b.month);
+
+                // Update the adjustments table
+                updateAdjustmentsTable();
+
+                // Clear input fields
+                document.getElementById('adjustmentAmount').value = '';
+                document.getElementById('adjustmentMonth').value = '';
+                document.getElementById('daysLate').value = '';
+                document.getElementById('defermentMonths').value = '';
+            }
+
+            function removeAdjustment(index) {
+                adjustments.splice(index, 1);
+                updateAdjustmentsTable();
+            }
+
+            function updateAdjustmentsTable() {
+                const tableBody = document.getElementById("adjustments-body");
+                tableBody.innerHTML = "";
+
+                adjustments.forEach((adjustment, index) => {
+                    const row = document.createElement("tr");
+
+                    const typeCell = document.createElement("td");
+                    typeCell.textContent =
+                        adjustment.type === 'overpayment' ? 'Overpayment' :
+                        adjustment.type === 'latePayment' ? 'Late Payment' :
+                        'Deferment';
+                    row.appendChild(typeCell);
+
+                    const monthCell = document.createElement("td");
+                    monthCell.textContent = adjustment.month;
+                    row.appendChild(monthCell);
+
+                    const amountCell = document.createElement("td");
+                    amountCell.textContent = formatCurrency(adjustment.amount);
+                    row.appendChild(amountCell);
+
+                    const daysLateCell = document.createElement("td");
+                    daysLateCell.textContent = adjustment.daysLate > 0 ? adjustment.daysLate : '-';
+                    row.appendChild(daysLateCell);
+
+                    const defermentMonthsCell = document.createElement("td");
+                    defermentMonthsCell.textContent = adjustment.defermentMonths > 0 ? adjustment.defermentMonths : '-';
+                    row.appendChild(defermentMonthsCell);
+
+                    const actionCell = document.createElement("td");
+                    const removeButton = document.createElement("button");
+                    removeButton.textContent = "Remove";
+                    removeButton.classList.add("remove-adjustment");
+                    removeButton.onclick = () => removeAdjustment(index);
+                    actionCell.appendChild(removeButton);
+                    row.appendChild(actionCell);
+
+                    tableBody.appendChild(row);
+                });
+            }
+
+            function updateMonthlyDueDate() {
+                const loanStartDateInput = document.getElementById("loanStartDate").value;
+                const firstPaymentTiming = parseInt(document.getElementById("firstPaymentTiming").value);
+                const monthlyDueDateDisplay = document.getElementById("monthlyDueDateDisplay");
+
+                if (!loanStartDateInput || isNaN(firstPaymentTiming)) {
+                    monthlyDueDateDisplay.textContent = "";
+                    return;
+                }
+
+                // Parse the loan start date components
+                const [year, monthInput, day] = loanStartDateInput.split('-').map(Number);
+                // Create the date in UTC to avoid time zone issues
+                let scheduledPaymentDate = new Date(Date.UTC(year, monthInput - 1, day));
+
+                // Add the first payment timing in milliseconds
+                scheduledPaymentDate = new Date(scheduledPaymentDate.getTime() + firstPaymentTiming * 24 * 60 * 60 * 1000);
+
+                const dueDay = scheduledPaymentDate.getUTCDate();
+                const ordinalSuffix = (n) => {
+                    const s = ["th", "st", "nd", "rd"],
+                          v = n % 100;
+                    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+                };
+
+                monthlyDueDateDisplay.textContent = `Monthly Due Date: Payment due on the ${ordinalSuffix(dueDay)} of each month.`;
+            }
+
+            // Attach event listeners to update monthly due date
+            document.getElementById("loanStartDate").addEventListener('change', updateMonthlyDueDate);
+            document.getElementById("firstPaymentTiming").addEventListener('change', updateMonthlyDueDate);
+
+            function generateAmortizationSchedule() {
+                const principal = parseFloat(document.getElementById("principalAmort").value);
+                const apr = parseFloat(document.getElementById("aprAmort").value);
+                const termMonths = parseInt(document.getElementById("termAmort").value);
+                const loanStartDateInput = document.getElementById("loanStartDate").value;
+                const firstPaymentTiming = parseInt(document.getElementById("firstPaymentTiming").value);
+
+                const errorMessage = document.getElementById("error-message-amortization");
+                errorMessage.textContent = "";
+
+                if (isNaN(principal) || isNaN(apr) || isNaN(termMonths) ||
+                    principal <= 0 || apr <= 0 || termMonths <= 0) {
+                    errorMessage.textContent = "Please enter valid positive numbers for principal, APR, and loan term.";
+                    return;
+                }
+
+                if (!loanStartDateInput) {
+                    errorMessage.textContent = "Please enter a valid loan start date.";
+                    return;
+                }
+
+                // Parse the loan start date components
+                const [year, monthInput, day] = loanStartDateInput.split('-').map(Number);
+                // Create the date in UTC to avoid time zone issues
+                let scheduledPaymentDate = new Date(Date.UTC(year, monthInput - 1, day));
+
+                // Calculate first payment date based on 30 or 45 days
+                scheduledPaymentDate = new Date(scheduledPaymentDate.getTime() + firstPaymentTiming * 24 * 60 * 60 * 1000);
+                const firstPaymentDate = new Date(scheduledPaymentDate);
+
+                // Monthly payment using the amortization formula
+                const monthlyRate = (apr / 100) / 12;
+                const monthlyPayment = (principal * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -termMonths));
+
+                let balance = principal;
+                let amortizationData = [];
+                let labels = [];
+
+                let totalInterest = 0;
+                let originalTotalInterest = 0;
+
+                let monthCounter = 1; // Changed variable name to 'monthCounter' to avoid conflicts
+                let paymentNumber = 1;
+
+                // Copy of the balance for calculating original total interest without adjustments
+                let originalBalance = principal;
+
+                // Calculate original total interest without adjustments
+                for (let m = 1; m <= termMonths; m++) {
+                    let interest = originalBalance * monthlyRate;
+                    let principalPaid = monthlyPayment - interest;
+                    originalBalance -= principalPaid;
+                    originalTotalInterest += interest;
+                    if (originalBalance <= 0) break;
+                }
+
+                let accruedInterest = 0;
+
+                while (balance > 0 && paymentNumber <= 360) { // Limit to 30 years max
+                    // Adjust payment date for deferments and late payments
+                    let actualPaymentDate = new Date(scheduledPaymentDate);
+
+                    // Check for adjustments
+                    const adjustment = adjustments.find(adj => adj.month === monthCounter);
+
+                    let daysLate = 0;
+                    let isDeferment = false;
+                    let defermentMonths = 0;
+                    let overpaymentAmount = 0;
+
+                    if (adjustment) {
+                        if (adjustment.type === 'latePayment') {
+                            daysLate = adjustment.daysLate;
+                            actualPaymentDate = new Date(actualPaymentDate.getTime() + daysLate * 24 * 60 * 60 * 1000);
+                        } else if (adjustment.type === 'deferment') {
+                            isDeferment = true;
+                            defermentMonths = adjustment.defermentMonths;
+                        } else if (adjustment.type === 'overpayment') {
+                            overpaymentAmount = adjustment.amount;
+                        }
+                    }
+
+                    // Calculate days between payments
+                    let daysBetweenPayments;
+                    if (amortizationData.length > 0) {
+                        const lastPaymentDate = amortizationData[amortizationData.length - 1].actualPaymentDate || amortizationData[amortizationData.length - 1].paymentDate;
+                        const timeDiff = actualPaymentDate - lastPaymentDate;
+                        daysBetweenPayments = timeDiff / (1000 * 3600 * 24);
+                    } else {
+                        // Loan start date in UTC
+                        const loanStartDate = new Date(Date.UTC(year, monthInput - 1, day));
+                        const timeDiff = actualPaymentDate - loanStartDate;
+                        daysBetweenPayments = timeDiff / (1000 * 3600 * 24);
+                    }
+
+                    // Handle deferments
+                    if (isDeferment) {
+                        for (let i = 0; i < defermentMonths; i++) {
+                            // Accrue interest during deferment
+                            let interest = balance * monthlyRate;
+                            accruedInterest += interest;
+                            totalInterest += interest;
+
+                            amortizationData.push({
+                                month: monthCounter,
+                                paymentDate: new Date(scheduledPaymentDate),
+                                actualPaymentDate: null,
+                                daysBetweenPayments: null,
+                                principalPaid: 0,
+                                interestPaid: 0,
+                                totalPayment: 0,
+                                balance: balance,
+                                accruedInterest: accruedInterest,
+                                isDeferment: true
+                            });
+
+                            // Increment month and adjust scheduled payment date
+                            monthCounter++;
+                            scheduledPaymentDate.setUTCMonth(scheduledPaymentDate.getUTCMonth() + 1);
+                            scheduledPaymentDate.setUTCDate(firstPaymentDate.getUTCDate());
+                        }
+                        continue;
+                    }
+
+                    // Calculate interest for the period based on actual days between payments
+                    let interest = balance * (apr / 100) * (daysBetweenPayments / 365);
+                    totalInterest += interest;
+
+                    // Include accrued interest
+                    interest += accruedInterest;
+                    accruedInterest = 0;
+
+                    // Payment allocation
+                    let totalPayment = monthlyPayment + overpaymentAmount;
+
+                    let interestPaid = Math.min(totalPayment, interest);
+                    let principalPaid = totalPayment - interestPaid;
+
+                    if (principalPaid > balance) {
+                        principalPaid = balance;
+                        totalPayment = interestPaid + principalPaid;
+                    }
+
+                    balance -= principalPaid;
+
+                    if (balance < 0) balance = 0;
+
+                    amortizationData.push({
+                        month: monthCounter,
+                        paymentDate: new Date(scheduledPaymentDate),
+                        actualPaymentDate: new Date(actualPaymentDate),
+                        daysBetweenPayments: Math.round(daysBetweenPayments),
+                        principalPaid: principalPaid,
+                        interestPaid: interestPaid,
+                        totalPayment: totalPayment,
+                        balance: balance,
+                        accruedInterest: accruedInterest,
+                        isDeferment: false
+                    });
+
+                    // Format the label to show Month and Year with payment number
+                    const options = { month: 'long', year: 'numeric', timeZone: 'UTC' };
+                    labels.push(`${scheduledPaymentDate.toLocaleDateString('en-US', options)} (Payment ${paymentNumber})`);
+
+                    // Increment counters
+                    monthCounter++;
+                    paymentNumber++;
+
+                    // Move to next scheduled payment date
+                    scheduledPaymentDate.setUTCMonth(scheduledPaymentDate.getUTCMonth() + 1);
+                    scheduledPaymentDate.setUTCDate(firstPaymentDate.getUTCDate());
+
+                    // Break if balance is zero
+                    if (balance <= 0) {
+                        break;
+                    }
+                }
+
+                // Prepare data for the chart
+                const principalData = amortizationData.map(data => data.principalPaid);
+                const interestData = amortizationData.map(data => data.interestPaid);
+
+                // Destroy previous chart instance if exists
+                if (amortizationChart) {
+                    amortizationChart.destroy();
+                }
+
+                const ctx = document.getElementById('amortizationChart').getContext('2d');
+                amortizationChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Principal Paid',
+                                data: principalData,
+                                backgroundColor: '#28a745'
+                            },
+                            {
+                                label: 'Interest Paid',
+                                data: interestData,
+                                backgroundColor: '#dc3545'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: {
+                                stacked: true
+                            },
+                            y: {
+                                stacked: true,
+                                title: {
+                                    display: true,
+                                    text: 'Amount ($)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Amortization Schedule'
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                callbacks: {
+                                    title: function(tooltipItems) {
+                                        // Display the formatted date with payment number
+                                        const index = tooltipItems[0].dataIndex;
+                                        const data = amortizationData[index];
+                                        const paymentDate = data.paymentDate;
+                                        const paymentNumber = index + 1;
+                                        const options = { month: 'long', year: 'numeric', timeZone: 'UTC' };
+                                        return `${paymentDate.toLocaleDateString('en-US', options)} (Payment ${paymentNumber})`;
+                                    },
+                                    afterBody: function(tooltipItems) {
+                                        const index = tooltipItems[0].dataIndex;
+                                        const data = amortizationData[index];
+                                        const messages = [];
+
+                                        if (data.isDeferment) {
+                                            messages.push(`Deferment Period`);
+                                            messages.push(`Interest Accrued: ${formatCurrency(data.accruedInterest.toFixed(2))}`);
+                                        } else {
+                                            messages.push(`Total Payment: ${formatCurrency(data.totalPayment.toFixed(2))}`);
+                                            messages.push(`Remaining Balance: ${formatCurrency(data.balance.toFixed(2))}`);
+
+                                            if (data.accruedInterest > 0) {
+                                                messages.push(`Accrued Interest Remaining: ${formatCurrency(data.accruedInterest.toFixed(2))}`);
+                                            }
+                                        }
+
+                                        return messages;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Display summary
+                displaySummary(originalTotalInterest, totalInterest, paymentNumber - 1, termMonths);
+            }
+
+            function displaySummary(originalInterest, adjustedInterest, adjustedTerm, originalTerm) {
+                const summaryDiv = document.getElementById('summary');
+
+                const interestDifference = adjustedInterest - originalInterest;
+                const termDifference = adjustedTerm - originalTerm;
+
+                summaryDiv.innerHTML = `
+                    <h4>Summary of Changes</h4>
+                    <p><strong>Original Total Interest:</strong> ${formatCurrency(originalInterest.toFixed(2))}</p>
+                    <p><strong>Adjusted Total Interest:</strong> ${formatCurrency(adjustedInterest.toFixed(2))}</p>
+                    <p><strong>Interest Difference:</strong> ${formatCurrency(interestDifference.toFixed(2))} (${interestDifference >= 0 ? 'Increase' : 'Decrease'})</p>
+                    <p><strong>Original Loan Term:</strong> ${originalTerm} months</p>
+                    <p><strong>Adjusted Loan Term:</strong> ${adjustedTerm} months</p>
+                    <p><strong>Term Difference:</strong> ${termDifference} months (${termDifference >= 0 ? 'Longer' : 'Shorter'})</p>
+                `;
+            }
+
+            // Attach functions to window for accessibility
+            window.toggleAccordion = toggleAccordion;
+            window.toggleCollapsible = toggleCollapsible;
+            window.calculateFinanceCharge = calculateFinanceCharge;
+            window.useDFC = useDFC;
+            window.calculatePaymentBreakdown = calculatePaymentBreakdown;
+            window.calculateLargePayment = calculateLargePayment;
+            window.addAdjustment = addAdjustment;
+            window.generateAmortizationSchedule = generateAmortizationSchedule;
+            window.updateMonthlyDueDate = updateMonthlyDueDate;
+
+        })();
+    </script>
+</body>
+</html>
